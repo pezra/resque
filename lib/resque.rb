@@ -158,6 +158,15 @@ module Resque
     end
   end
 
+  # Workers use this proc to determine the order in which queues
+  # should be checked for work when they are started with a queues
+  # equal to "*".  The default behavior is sort the queues in alpha
+  # order.  Prioritizing queues can be achieved by providing a sort
+  # function that puts higher priority queues before lower priority
+  # queues.
+  attr_accessor :queue_order_proc 
+  self.queue_order_proc = lambda{|a,b| a <=> b}
+  
   # Returns an array of all known Resque queues as strings.
   def queues
     Array(redis.smembers(:queues))

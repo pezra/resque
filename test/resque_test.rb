@@ -165,6 +165,12 @@ context "Resque" do
     assert_equal %w( cars people ), Resque.queues
   end
 
+  test "provides way to register queue ordering prox" do
+    proc = lambda {|a, b| (a <=> b) * -1}
+    Resque.queue_order_proc = proc
+    assert_equal proc, Resque.queue_order_proc
+  end
+
   test "queues are always a list" do
     Resque.redis.flushall
     assert_equal [], Resque.queues

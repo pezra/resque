@@ -38,6 +38,21 @@ The `after_fork` hook will be run in the child process and is passed
 the current job. Any changes you make, therefor, will only live as
 long as the job currently being processes.
 
+The `queue_order_proc` hook is used to determine the order in which
+queues will be checked for jobs to process when the queues list is
+splat ("\*").  The `queue_order_proc` will be passed two queue names.
+The proc should return -1 if the first queue should be checked before
+the second queue; 0 if either change be checked first; 1 the second
+queue should be checked before the first.  (`queue_order_proc` has the
+same interface as the block passed to `Enumberable` sort.)
+  
+    # Approximately fair queue handling.  Works by checking queues in
+    # a different random order each time.  This means that every
+    # queue will be checked first occasionally so queues do not get
+    # starved.
+    Resque.queue_order_proc = proc { rand <=> rand}
+
+
 All worker hooks can also be set using a setter, e.g.
 
     Resque.after_fork = proc { puts "called" }
@@ -119,3 +134,4 @@ Modules are even better because jobs can use many of them.
         ...
       end
     end
+

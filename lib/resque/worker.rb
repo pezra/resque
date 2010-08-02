@@ -180,11 +180,12 @@ module Resque
       nil
     end
 
-    # Returns a list of queues to use when searching for a job.
-    # A splat ("*") means you want every queue (in alpha order) - this
-    # can be useful for dynamically adding new queues.
+    # Returns a list of queues to use when searching for a job.  A
+    # splat ("*") means you want every queue (in the order specified
+    # by Resque.queue_order_proc; alpha order by default) - this can
+    # be useful for dynamically adding new queues.
     def queues
-      @queues[0] == "*" ? Resque.queues.sort : @queues
+      @queues[0] == "*" ? Resque.queues.sort(&Resque.queue_order_proc) : @queues
     end
 
     # Not every platform supports fork. Here we do our magic to

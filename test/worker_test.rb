@@ -84,7 +84,7 @@ context "Resque::Worker" do
     assert_equal 0, Resque.size(:blahblah)
   end
 
-  test "processes * queues in alphabetical order" do
+  test "processes * queues in alphabetical order by default" do
     Resque::Job.create(:high, GoodJob)
     Resque::Job.create(:critical, GoodJob)
     Resque::Job.create(:blahblah, GoodJob)
@@ -97,6 +97,23 @@ context "Resque::Worker" do
     end
 
     assert_equal %w( jobs high critical blahblah ).sort, processed_queues
+  end
+
+  test "processes * queues in order specified by Resque.queue_order_proc" do
+    Resque::Job.create(:high, GoodJob)
+    Resque::Job.create(:critical, GoodJob)
+    Resque::Job.create(:blahblah, GoodJob)
+
+    Resque.queue_order_proc = lambda{|a,b| (a <=> b) * -1}  # reverse sort
+
+    worker = Resque::Worker.new("*")
+    processed_queues = []
+
+    worker.work(0) do |job|
+      processed_queues << job.queue
+    end
+
+    assert_equal %w( jobs high critical blahblah ).sort.reverse, processed_queues
   end
 
   test "has a unique id" do
